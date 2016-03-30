@@ -2,12 +2,44 @@ define(['jquery'], function($) {
 	
     var CustomWidget = function () {
     	
-    	var self = this, $input, $list, $stylesheet, wcode, wurl, source, field, settings;
+    	var self = this, $stylesheet, wcode, wurl, source, field, settings;
 
     	var renderList = function(list) {
     		return list.map(function(item) {
 				return '<li class="widget-autocomplete__item" value="' + item + '">' + item + '</li>';
 			}).join("");
+    	}
+
+    	var render = function(input) {
+
+			var $list = $('<ul class="widget-autocomplete"></ul>');
+
+			input.after($list);
+
+			input.keyup(function(e) {
+				
+				var key = e.keyCode;
+				var value = $(this).val().toLowerCase();
+				var filteredList = list.filter(function(item) {
+					return item.toLowerCase().indexOf(value) !== -1 ? true : false;
+				});
+				
+				if (key == 13) { // enter
+					$(this).val(filteredList[0]);
+					return false;
+				}
+
+				$list.html(renderList(filteredList));
+				$list.show();
+			});
+
+			$list.on('click', 'li', function(e) {
+				input.val($(this).text());
+				$list.hide();
+				e.stopPropagation();
+				return false;
+			});
+
     	}
 
 		this.callbacks = {
@@ -39,26 +71,6 @@ define(['jquery'], function($) {
 				if ($stylesheet.length == 0) {
 					$('head').append('<link rel="stylesheet" href="' + wurl + '/style.css" type="text/css" data-widget="' + wcode + '" />');
 				}
-
-				for (var i = 0; i < field.length; i++) {
-					$input = $('tr[data-id=' + field[i] + ']').find('input');
-					if ($input.length > 0 && $input.is(':visible')) {
-						break;
-					}
-				}
-
-				$list = $('<ul class="widget-autocomplete"></ul>');
-
-				$.get(wurl+'/subjects.json', function(data) {
-					list = data.data.map(function(item) {
-						return item.name;
-					});
-					$list.html(renderList(list));
-				});
-
-				if ($input.length > 0) {
-					$input.after($list);
-				}
 				
 				return true;
 			},
@@ -70,31 +82,25 @@ define(['jquery'], function($) {
 				
 				console.log('bind_actions');
 
-				$(document).on('click', function() {
-					$list.hide();
-				});
-				
-				if ($input.length > 0) {
-					$input.keyup(function(e) {
-						var key = e.keyCode;
-						if (key == 13) { // enter
-							$input.val(list[0]);
-							return false;
-						}
-						var value = $input.val().toLowerCase();
-						var filteredList = list.filter(function(item) {
-							return item.toLowerCase().indexOf(value) !== -1 ? true : false;
-						});
-						$list.html(renderList(filteredList));
-						$list.show();
-					});
-				}
+				$.get(wurl+'/subjects.json', function(data) {
 
-				$list.on('click', 'li', function(e) {
-					$input.val($(this).text());
-					$list.hide();
-					e.stopPropagation();
-					return false;
+					list = data.data.map(function(item) {
+						return item.name;
+					});
+
+					for (var i = 0; i < field.length; i++) {
+					
+						var $input = $('tr[data-id=' + field[i] + ']').find('input');
+						
+						if ($input.length > 0 && $('tr[data-id=' + field[i] + ']').is(':visible')) {
+							render($input);
+						}
+					}
+
+				});
+
+				$(document).on('click', function() {
+					$('ul.widget-autocomplete').hide();
 				});
 				
 				return true;
