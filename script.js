@@ -2,7 +2,7 @@ define(['jquery'], function($) {
 	
     var CustomWidget = function () {
     	
-    	var self = this, $input, $list, $stylesheet, wcode, wurl, source, field, settings;
+    	var self = this, $input = [], $list = [], $stylesheet, wcode, wurl, source, field, settings;
 
     	var renderList = function(list) {
     		return list.map(function(item) {
@@ -39,26 +39,6 @@ define(['jquery'], function($) {
 				if ($stylesheet.length == 0) {
 					$('head').append('<link rel="stylesheet" href="' + wurl + '/style.css" type="text/css" data-widget="' + wcode + '" />');
 				}
-
-				for (var i = 0; i < field.length; i++) {
-					$input = $('tr[data-id=' + field[i] + ']').find('input');
-					if ($input.length > 0 && $input.is(':visible')) {
-						break;
-					}
-				}
-
-				$list = $('<ul class="widget-autocomplete"></ul>');
-
-				$.get(wurl+'/subjects.json', function(data) {
-					list = data.data.map(function(item) {
-						return item.name;
-					});
-					$list.html(renderList(list));
-				});
-
-				if ($input.length > 0) {
-					$input.after($list);
-				}
 				
 				return true;
 			},
@@ -70,31 +50,61 @@ define(['jquery'], function($) {
 				
 				console.log('bind_actions');
 
-				$(document).on('click', function() {
-					$list.hide();
-				});
-				
-				if ($input.length > 0) {
-					$input.keyup(function(e) {
-						var key = e.keyCode;
-						if (key == 13) { // enter
-							$input.val(list[0]);
-							return false;
+				for (var i = 0; i < field.length; i++) {
+					
+					$input[i] = $('tr[data-id=' + field[i] + ']').find('input');
+					
+					if ($input[i].length > 0 && $('tr[data-id=' + field[i] + ']').is(':visible')) {
+
+						// break;
+
+						$list[i] = $('<ul class="widget-autocomplete"></ul>');
+
+						if ($input[i].length > 0) {
+							$input[i].after($list[i]);
 						}
-						var value = $input.val().toLowerCase();
-						var filteredList = list.filter(function(item) {
-							return item.toLowerCase().indexOf(value) !== -1 ? true : false;
+						
+						if ($input[i].length > 0) {
+							$input[i].keyup(function(e) {
+								
+								var key = e.keyCode;
+								var value = $(this).val().toLowerCase();
+								var filteredList = list.filter(function(item) {
+									return item.toLowerCase().indexOf(value) !== -1 ? true : false;
+								});
+								
+								if (key == 13) { // enter
+									$(this).val(filteredList[0]);
+									return false;
+								}
+
+								$(this).siblings('ul.widget-autocomplete').html(renderList(filteredList));
+								$(this).siblings('ul.widget-autocomplete').show();
+							});
+						}
+
+						$list[i].on('click', 'li', function(e) {
+							$(this).closest('ul.widget-autocomplete').siblings('input').val($(this).text());
+							$(this).closest('ul.widget-autocomplete').hide();
+							e.stopPropagation();
+							return false;
 						});
-						$list.html(renderList(filteredList));
-						$list.show();
-					});
+					}
 				}
 
-				$list.on('click', 'li', function(e) {
-					$input.val($(this).text());
-					$list.hide();
-					e.stopPropagation();
-					return false;
+				$.get(wurl+'/subjects.json', function(data) {
+					list = data.data.map(function(item) {
+						return item.name;
+					});
+					$.each($list, function (i, val) {
+						if (typeof $list[i] != 'undefined') {
+							$list[i].html(renderList(list));
+						}
+					});
+				});
+
+				$(document).on('click', function() {
+					$('ul.widget-autocomplete').hide();
 				});
 				
 				return true;
