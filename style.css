@@ -1,0 +1,21 @@
+.widget-autocomplete {
+	position: absolute;
+	display: none;
+	max-width: 200px;
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	list-style-type: none;
+	background-color: #fff;
+	z-index: 100;
+	border: 1px solid #eee;
+}
+
+.widget-autocomplete__item {
+	padding: 5px 10px;
+	cursor: pointer;
+}
+
+.widget-autocomplete__item:hover {
+	background-color: #cecece;
+}
