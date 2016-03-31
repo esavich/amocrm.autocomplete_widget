@@ -1,13 +1,45 @@
 define(['jquery'], function($) {
 	
     var CustomWidget = function () {
-    	
-    	var self = this, $input = [], $list = [], $stylesheet, wcode, wurl, source, field, settings;
+
+    	var self = this, $stylesheet, wcode, wurl, source, field, settings;
 
     	var renderList = function(list) {
     		return list.map(function(item) {
 				return '<li class="widget-autocomplete__item" value="' + item + '">' + item + '</li>';
 			}).join("");
+    	}
+
+    	var render = function(input) {
+
+			var $list = $('<ul class="widget-autocomplete"></ul>');
+
+			input.after($list);
+
+			input.keyup(function(e) {
+				
+				var key = e.keyCode;
+				var value = $(this).val().toLowerCase();
+				var filteredList = list.filter(function(item) {
+					return item.toLowerCase().indexOf(value) !== -1 ? true : false;
+				});
+				
+				if (key == 13) { // enter
+					$(this).val(filteredList[0]);
+					return false;
+				}
+
+				$list.html(renderList(filteredList));
+				$list.show();
+			});
+
+			$list.on('click', 'li', function(e) {
+				input.val($(this).text());
+				$list.hide();
+				e.stopPropagation();
+				return false;
+			});
+
     	}
 
 		this.callbacks = {
@@ -50,57 +82,21 @@ define(['jquery'], function($) {
 				
 				console.log('bind_actions');
 
-				for (var i = 0; i < field.length; i++) {
-					
-					$input[i] = $('tr[data-id=' + field[i] + ']').find('input');
-					
-					if ($input[i].length > 0 && $('tr[data-id=' + field[i] + ']').is(':visible')) {
-
-						// break;
-
-						$list[i] = $('<ul class="widget-autocomplete"></ul>');
-
-						if ($input[i].length > 0) {
-							$input[i].after($list[i]);
-						}
-						
-						if ($input[i].length > 0) {
-							$input[i].keyup(function(e) {
-								
-								var key = e.keyCode;
-								var value = $(this).val().toLowerCase();
-								var filteredList = list.filter(function(item) {
-									return item.toLowerCase().indexOf(value) !== -1 ? true : false;
-								});
-								
-								if (key == 13) { // enter
-									$(this).val(filteredList[0]);
-									return false;
-								}
-
-								$(this).siblings('ul.widget-autocomplete').html(renderList(filteredList));
-								$(this).siblings('ul.widget-autocomplete').show();
-							});
-						}
-
-						$list[i].on('click', 'li', function(e) {
-							$(this).closest('ul.widget-autocomplete').siblings('input').val($(this).text());
-							$(this).closest('ul.widget-autocomplete').hide();
-							e.stopPropagation();
-							return false;
-						});
-					}
-				}
-
 				$.get(wurl+'/subjects.json', function(data) {
+
 					list = data.data.map(function(item) {
 						return item.name;
 					});
-					$.each($list, function (i, val) {
-						if (typeof $list[i] != 'undefined') {
-							$list[i].html(renderList(list));
+
+					for (var i = 0; i < field.length; i++) {
+					
+						var $input = $('tr[data-id=' + field[i] + ']').find('input');
+						
+						if ($input.length > 0 && $('tr[data-id=' + field[i] + ']').is(':visible')) {
+							render($input);
 						}
-					});
+					}
+
 				});
 
 				$(document).on('click', function() {
