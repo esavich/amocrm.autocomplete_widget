@@ -92,7 +92,7 @@ define(['jquery'], function($) {
 					
 						var $input = $('tr[data-id=' + field[i] + ']').find('input');
 						
-						if ($input.length > 0 && $('tr[data-id=' + field[i] + ']').is(':visible')) {
+						if ($input.length > 0) {
 							render($input);
 						}
 					}
