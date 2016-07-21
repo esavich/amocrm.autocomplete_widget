@@ -5,7 +5,7 @@
         "short_description": "widget.short_description",
         "code": "autocomplete_subjects",
         "secret_key": "ea53d9dbb164c4f1d5e5b2be7825d9f7f5b476db1aa6799893a147721be49c71",
-        "version": "0.3.0",
+        "version": "0.4.0",
         "interface_version": 2,
         "init_once": false,
         "locale":[
