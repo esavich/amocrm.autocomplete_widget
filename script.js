@@ -289,6 +289,7 @@ define(['jquery'], function ($) {
 
             $list.on('click', 'li', function (e) {
                 input.val($(this).text());
+                input.keyup().keydown().change().blur();
                 $list.hide();
                 e.stopPropagation();
                 return false;
