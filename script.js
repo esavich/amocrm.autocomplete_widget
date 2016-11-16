@@ -253,19 +253,21 @@ define(['jquery'], function ($) {
         {
             "name": "Ярославская область"
         }
-    ]
+    ];
     var CustomWidget = function () {
 
-        var self = this, $stylesheet, wcode, wurl, source, field, settings;
+        var self = this, $stylesheet, wcode, wurl, field, settings;
 
         var renderList = function (list) {
             return list.map(function (item) {
                 return '<li class="widget-autocomplete__item" value="' + item + '">' + item + '</li>';
             }).join("");
-        }
+        };
 
         var render = function (input) {
-
+            if(input.data('autocomplete-added') === true) {
+                return;
+            }
             var $list = $('<ul class="widget-autocomplete"></ul>');
 
             input.after($list);
@@ -275,7 +277,7 @@ define(['jquery'], function ($) {
                 var key = e.keyCode;
                 var value = $(this).val().toLowerCase();
                 var filteredList = list.filter(function (item) {
-                    return item.toLowerCase().indexOf(value) !== -1 ? true : false;
+                    return item.toLowerCase().indexOf(value) !== -1;
                 });
 
                 if (key == 13) { // enter
@@ -294,8 +296,8 @@ define(['jquery'], function ($) {
                 e.stopPropagation();
                 return false;
             });
-
-        }
+            input.data('autocomplete-added', true);
+        };
 
         this.callbacks = {
             render: function () {
@@ -344,11 +346,11 @@ define(['jquery'], function ($) {
 
                 for (var i = 0; i < field.length; i++) {
 
-                    var $input = $('tr[data-id=' + field[i] + ']').find('input');
-
-                    if ($input.length > 0) {
+                    $('body').on('click','input[name="CFV[' + field[i] + ']"]' ,function(){
+                        $input = $(this);
                         render($input);
-                    }
+                    });
+
                 }
 
 
